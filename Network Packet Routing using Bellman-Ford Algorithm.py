@@ -1,51 +1,52 @@
-# Binary Search Tree Searching operation
+class Graph:
+    def __init__(self, vertices):
+        self.V = vertices  # Number of vertices in the graph
+        self.graph = []  # List to store all edges
 
-class Node:
-    def __init__(self, key):
-        self.left = None
-        self.right = None
-        self.val = key
+    # Function to add an edge to the graph
+    def add_edge(self, u, v, w):
+        self.graph.append([u, v, w])
 
-# Insert a new node
-def insert(root, key):
-    if root is None:
-        return Node(key)
-    else:
-        if key < root.val:
-            root.left = insert(root.left, key)
-        else:
-            root.right = insert(root.right, key)
-    return root
+    # Bellman-Ford algorithm to find the shortest path from source to all vertices
+    def bellman_ford(self, src):
+        # Step 1: Initialize distances from src to all other vertices as INFINITE
+        dist = [float("Inf")] * self.V
+        dist[src] = 0  # Distance of source vertex from itself is always 0
 
-# Search for a node in the BST
-def search(root, key):
-    # Base case: root is null or key is present at root
-    if root is None or root.val == key:
-        return root
-    
-    # Key is greater than root's key
-    if key > root.val:
-        return search(root.right, key)
+        # Step 2: Relax all edges |V| - 1 times
+        for _ in range(self.V - 1):
+            for u, v, w in self.graph:
+                if dist[u] != float("Inf") and dist[u] + w < dist[v]:
+                    dist[v] = dist[u] + w
 
-    # Key is smaller than root's key
-    return search(root.left, key)
+        # Step 3: Check for negative-weight cycles
+        for u, v, w in self.graph:
+            if dist[u] != float("Inf") and dist[u] + w < dist[v]:
+                print("Graph contains negative weight cycle")
+                return
 
-# Helper function to create a BST from user input
-def create_bst():
-    root = None
-    print("Enter the elements to insert into the BST (space-separated):")
-    elements = list(map(int, input().split()))
-    for elem in elements:
-        root = insert(root, elem)
-    return root
+        # Print the calculated shortest distances
+        self.print_solution(dist)
 
-# Main code for search operation
-if __name__ == "__main__":
-    bst_root = create_bst()
-    key_to_search = int(input("Enter the value to search: "))
-    
-    result = search(bst_root, key_to_search)
-    if result:
-        print(f"Value {key_to_search} found in the BST.")
-    else:
-        print(f"Value {key_to_search} not found in the BST.")
+    # Utility function to print the calculated distances
+    def print_solution(self, dist):
+        print("Vertex Distance from Source")
+        for i in range(self.V):
+            print(f"{i}\t\t{dist[i]}")
+
+
+# Example usage:
+g = Graph(5)  # Creating a graph with 5 vertices
+
+# Adding edges to the graph
+g.add_edge(0, 1, -1)
+g.add_edge(0, 2, 4)
+g.add_edge(1, 2, 3)
+g.add_edge(1, 3, 2)
+g.add_edge(4, 3, 2)
+g.add_edge(3, 2, 5)
+g.add_edge(3, 1, 1)
+g.add_edge(4, 1, -3)
+
+# Running Bellman-Ford algorithm from vertex 0
+g.bellman_ford(0)
